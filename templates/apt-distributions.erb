@@ -1,5 +1,5 @@
-Codename: <%= version %>
-Architectures: <%= arch %>
+Codename: <%= @version %>
+Architectures: <%= @arch %>
 Components: main
-Description: <%= description %>
-<% if sign = 'disabled' %>#SignWith:<% else %>SignWith: <%= sign %><% end %>
+Description: <%= @description %>
+<% if @sign == 'disabled' %>#SignWith:<% else %>SignWith: <%= @sign %><% end %>
