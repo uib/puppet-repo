@@ -1,0 +1,26 @@
+#!/bin/bash -ue
+set -e
+
+## Sanity check
+if [ $# -ne 2 ]; then
+  echo "I need two input parameters:"
+  echo "  gem-updaterepo <incomingdir> <filename>"
+  exit 1
+fi
+
+incoming=$1
+file=$2
+
+# Set params
+name="${incoming##*/}"
+base="${incoming%/*/*}"
+repo="$base/pub/$name"
+
+# Copy .gem
+/bin/su -c "cp "$incoming/$file" "$repo/gems"" <%= scope.lookupvar("repo::user") %>
+
+# Update repo
+/bin/su -c "/usr/bin/gem generate_index --update --directory "${repo}"" <%= scope.lookupvar("repo::user") %>
+
+rm "$incoming/$file"
+

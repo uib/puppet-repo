@@ -1,0 +1,29 @@
+#!/bin/bash -ue
+set -e
+
+## Sanity check
+if [ $# -ne 2 ]; then
+  echo "I need two input parameters:"
+  echo "  yum-updaterepo <incomingdir> <filename>"
+  exit 1
+fi
+
+incoming=$1
+file=$2
+
+# Set params
+name="${incoming##*/}"
+base="${incoming%/*/*}"
+repo="$base/pub/$name"
+
+# Copy .rpm 
+/bin/su -c "cp "$incoming/$file" "$repo"" <%= scope.lookupvar("repo::user") %>
+
+# Update repo
+/bin/su -c "/usr/bin/createrepo --update --database --cachedir "${repo}"/cache "${repo}"" <%= scope.lookupvar("repo::user") %>
+
+# Generate HTML index
+/bin/su -c "/usr/bin/repoview -q "${repo}"" <%= scope.lookupvar("repo::user") %>
+
+rm "$incoming/$file"
+

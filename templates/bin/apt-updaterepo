@@ -1,0 +1,24 @@
+#!/bin/bash -ue
+set -e
+
+## Sanity check
+if [ $# -ne 2 ]; then
+  echo "I need two input parameters:"
+  echo "  apt-updaterepo <incomingdir> <filename>"
+  exit 1
+fi
+
+incoming=$1
+file=$2
+
+# Set params
+name="${incoming##*/}"
+base="${incoming%/*/*}"
+repo="$base/pub/$name"
+codename=$(awk '/Codename/ { print $2 }' "$repo/conf/distributions")
+
+# Update repo
+/bin/su -c "/usr/local/bin/reprepro --keepunreferencedfiles -s -b "$repo" --waitforlock 360 includedeb "$codename" "$incoming/$file" >/dev/null" <%= scope.lookupvar("repo::user") %>
+
+rm "$incoming/$file"
+
