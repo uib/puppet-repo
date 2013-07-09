@@ -17,7 +17,7 @@ base="${incoming%/*/*}"
 repo="$base/pub/$name"
 
 # Copy .gem
-/bin/su -c "cp "$incoming/$file" "$repo/gems"" <%= scope.lookupvar("repo::user") %>
+/bin/su -c "cp -f "$incoming/$file" "$repo/gems"" <%= scope.lookupvar("repo::user") %>
 
 # Update repo
 /bin/su -c "/usr/bin/gem generate_index --update --directory "${repo}"" <%= scope.lookupvar("repo::user") %>
