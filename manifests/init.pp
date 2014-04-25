@@ -41,26 +41,26 @@
 #
 #  class { "repo": }
 #  
-# == Resources
-#
-# http://mirrorer.alioth.debian.org/
-#
 # == Authors
 #
-# Christian Bryn <christian.bryn@freecode.no>
-# Jan Ivar Beddari <janivar@beddari.net>
 # Raymond Kristiansen <raymond.kristiansen@it.uib.no>
+# Jan Ivar Beddari <janivar@beddari.net>
+# Christian Bryn <christian.bryn@freecode.no>
 #
 class repo (
   $basedir = "/var/lib/repo",
   $scriptdir = "/usr/local/bin",
   $user = "upload",
   $group = "upload",
-  $incoming = true
+  $incoming = true,
+  $generate_gpgkey = false
 ) {
 
   class { 'repo::install': } ->
   class { 'repo::config': } ->
   class { 'repo::service': }
+  if $generate_gpgkey {
+    class { 'repo::keygen': }
+  }
 
 }
