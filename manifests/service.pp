@@ -11,7 +11,7 @@
 class repo::service() {
 
   service { 'incrond':
-    ensure  => $::repo::incoming
+    ensure  => $::repo::incoming? { true => running, default => stopped }
   }
 
 }
