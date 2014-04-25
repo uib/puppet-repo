@@ -53,7 +53,7 @@ define repo::instance (
   $repotype,
   $arch,
   $description="${name} repository",
-  $sign='disabled'
+  $sign = false,
 ) {
   
   # Validate repo type
