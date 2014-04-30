@@ -1,4 +1,7 @@
-Codename: <%= @version %>
+<% @version.each do |codename| -%>
+Origin: UiB internal repository
+Label: UiB
+Codename: <%= codename %>
 Architectures: <%= @arch %>
 Components: main
 Description: <%= @description %>
@@ -7,3 +10,4 @@ SignWith: yes
 <% elsif @sign != false -%>
 SignWith: <%= @sign %>
 <%end -%>
+<% end -%>
