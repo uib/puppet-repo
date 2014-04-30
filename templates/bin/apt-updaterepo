@@ -16,6 +16,7 @@ name="${incoming##*/}"
 base="${incoming%/*/*}"
 repo="$base/pub/$name"
 #codename=$(awk '/Codename/ { print $2 }' "$repo/conf/distributions")
+# Filename should be on the form prog_version-x<codename>x_arch.deb
 codename=$(echo $file |cut -d'_' -f 2|tr -d [[:punct:],[:digit:]])
 
 # Update repo
