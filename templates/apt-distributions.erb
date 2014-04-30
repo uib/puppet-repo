@@ -1,5 +1,5 @@
 <% @real_version.each do |codename| -%>
-Origin: @name
+Origin: <%= @name %>
 Codename: <%= codename %>
 Architectures: <%= @arch %>
 Components: main
@@ -9,4 +9,5 @@ SignWith: yes
 <% elsif @sign != false -%>
 SignWith: <%= @sign %>
 <%end -%>
+
 <% end -%>
