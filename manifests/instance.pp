@@ -54,6 +54,7 @@ define repo::instance (
   $arch,
   $description="${name} repository",
   $sign = false,
+  $upload = true
 ) {
   
   # Validate repo type
@@ -61,9 +62,15 @@ define repo::instance (
     fail "Non-supported repository type"
   }
 
+  if is_array($version) {
+    $real_version = $version
+  } else {
+    $real_version = [ $version ]
+  }
+
   File {
-    owner => $repo::user,
-    group => $repo::group,
+    owner => $upload? { true => $repo::user, default => root },
+    group => $upload? { true => $repo::group, default => root },
     mode  => '0755',
   }
 
@@ -78,8 +85,6 @@ define repo::instance (
   # Incron entry
   file { "/etc/incron.d/${repotype}-${name}":
     ensure  => present,
-    owner   => $::repo::user,
-    group   => $::repo::group,
     mode    => '0644',
     content => template("${module_name}/incron.d/repo.erb"),
     notify  => Class['repo::service']
@@ -111,6 +116,17 @@ define repo::instance (
       unless  => "/usr/bin/test -d ${repodir}/quick",
       user    => $::repo::user,
       require => File["${repodir}/gems"],
+    }
+  }
+
+  # Yum stuff
+  if $repotype == 'yum' {
+    $yum_dirs = [
+      prefix($real_version, "${repo::basedir}/${repotype}/incoming/${name}/"),
+      prefix($real_version, "${repodir}/") ]
+    file { $yum_dirs:
+      ensure => directory,
+      require => File[$dirs]
     }
   }
 
