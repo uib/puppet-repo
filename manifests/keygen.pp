@@ -31,16 +31,13 @@ class repo::keygen(
     notify => Exec['repo export gpg pub key']
   }
 
-  exec { 'repo export gpg pub key':
-    command => "gpg --armor --output ${basedir}/apt/pub/gpg.key --export ${email}",
-    creates => "${basedir}/apt/pub/gpg.key",
-    require => Exec['repo gpg keygen trigger']
-  }
-
   exec { 'repo gpg keygen trigger':
     command => 'echo',
     unless => "test -s ${basedir}/.gnupg/pubring.gpg",
     notify => Exec['repo rngd urandom']
+  } -> exec { 'repo export gpg pub key':
+    command => "gpg --armor --output ${basedir}/apt/pub/gpg.key --export ${email}",
+    creates => "${basedir}/apt/pub/gpg.key",
   }
 
 }
