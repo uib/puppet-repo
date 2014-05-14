@@ -12,7 +12,8 @@ incoming=$1
 file=$2
 
 # Set params
-name="${incoming##*/}"
+name=$(echo $incoming | awk -F '/' '{ print $(NF-1) }')
+releasever="${incoming##*/}"
 base="${incoming%/*/*}"
 repo="$base/pub/$name"
 
