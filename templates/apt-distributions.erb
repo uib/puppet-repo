@@ -1,5 +1,13 @@
-Codename: <%= @version %>
+<% @real_version.each do |codename| -%>
+Origin: <%= @name %>
+Codename: <%= codename %>
 Architectures: <%= @arch %>
 Components: main
 Description: <%= @description %>
-<% if @sign == 'disabled' %>#SignWith:<% else %>SignWith: <%= @sign %><% end %>
+<% if @sign == true -%>
+SignWith: yes
+<% elsif @sign != false -%>
+SignWith: <%= @sign %>
+<%end -%>
+
+<% end -%>

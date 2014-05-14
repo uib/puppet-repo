@@ -12,7 +12,7 @@ class repo::install(
   $scriptdir = $::repo::scriptdir
 ) {
 
-  package { ['reprepro','createrepo','incron','repoview','rubygem-builder']:
+  package { ['reprepro','createrepo','incron','repoview','rubygem-builder','rubygems','gnupg2']:
     ensure => installed
   }
 
