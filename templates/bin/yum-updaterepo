@@ -14,17 +14,23 @@ file=$2
 # Set params
 name=$(echo $incoming | awk -F '/' '{ print $(NF-1) }')
 releasever="${incoming##*/}"
-base="${incoming%/*/*}"
+base="${incoming%/*/*/*}"
 repo="$base/pub/$name"
 
+# Debug info
+#echo $name
+#echo $base
+#echo $repo
+#echo $releasever
+
 # Copy .rpm 
-/bin/su -c "cp "$incoming/$file" "$repo"" <%= scope.lookupvar("repo::user") %>
+/bin/su -c "cp "${incoming}/${file}" "${repo}/${releasever}"" <%= scope.lookupvar("repo::user") %>
 
 # Update repo
-/bin/su -c "/usr/bin/createrepo --update --database --cachedir "${repo}"/cache "${repo}"" <%= scope.lookupvar("repo::user") %>
+/bin/su -c "/usr/bin/createrepo --update --database --cachedir "${repo}/${releasever}"/cache "${repo}/${releasever}"" <%= scope.lookupvar("repo::user") %>
 
 # Generate HTML index
-/bin/su -c "/usr/bin/repoview -q "${repo}"" <%= scope.lookupvar("repo::user") %>
+/bin/su -c "/usr/bin/repoview -q "${repo}/$repo"" <%= scope.lookupvar("repo::user") %>
 
 rm "$incoming/$file"
 

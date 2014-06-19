@@ -86,7 +86,7 @@ define repo::instance (
   file { "/etc/incron.d/${repotype}-${name}":
     ensure  => present,
     mode    => '0644',
-    content => template("${module_name}/incron.d/repo.erb"),
+    content => template("${module_name}/incron.d/repo-${repotype}.erb"),
     notify  => Class['repo::service']
   }
 
@@ -128,6 +128,24 @@ define repo::instance (
       ensure => directory,
       require => File[$dirs]
     }
+    # Create RHEL symlinks for use of yum variable $releasever
+    $pub_dir = prefix($real_version, "${repodir}/")
+    repo::instance::yum_rhel_symlink { $pub_dir:
+      require => File[$yum_dirs]
+    }
   }
 
+}
+
+define repo::instance::yum_rhel_symlink() {
+
+  file { "${name}Server":
+    ensure => link,
+    target => $name
+  }
+
+  file { "${name}Client":
+    ensure => link,
+    target => $name
+  }
 }
