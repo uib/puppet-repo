@@ -11,7 +11,8 @@
 class repo::config(
   $basedir    = $::repo::basedir,
   $user       = $::repo::user,
-  $group       = $::repo::group
+  $group      = $::repo::group,
+  $user_keys  = $::repo::user_keys
 ) {
 
   $dirs = [$basedir,
@@ -40,6 +41,27 @@ class repo::config(
     owner  => $user,
     group  => $group,
     mode   => '0755';
+  }
+
+  # Add ssh keys for upload users
+#  unless empty($ssh_keys) {
+  create_resources('repo::add_ssh_keys', $user_keys)
+#  }
+
+}
+
+define repo::add_ssh_keys(
+  $key,
+  $ensure = present,
+  $type = 'ssh-rsa',
+  $user = $::repo::user
+) {
+
+  ssh_authorized_key { "${name}-${user}":
+    ensure => $ensure,
+    key => $key,
+    type => $type,
+    user => $user
   }
 
 }

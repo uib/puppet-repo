@@ -50,17 +50,20 @@
 class repo (
   $basedir = "/var/lib/repo",
   $scriptdir = "/usr/local/bin",
-  $user = "upload",
-  $group = "upload",
+  $user = "repo",
+  $group = "repo",
   $incoming = true,
-  $generate_gpgkey = false
+  $generate_gpgkey = false,
+  $user_keys = {}
 ) {
 
   class { 'repo::install': } ->
   class { 'repo::config': } ->
   class { 'repo::service': }
   if $generate_gpgkey {
-    class { 'repo::keygen': }
+    class { 'repo::keygen':
+      require => Class['repo::config']
+    }
   }
 
 }
