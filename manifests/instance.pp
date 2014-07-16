@@ -69,8 +69,8 @@ define repo::instance (
   }
 
   File {
-    owner => $upload? { true => $repo::user, default => root },
-    group => $upload? { true => $repo::group, default => root },
+    owner => $repo::user,
+    group => $repo::group,
     mode  => '0755',
   }
 
@@ -86,6 +86,8 @@ define repo::instance (
   file { "/etc/incron.d/${repotype}-${name}":
     ensure  => present,
     mode    => '0644',
+    owner   => root,
+    group   => root,
     content => template("${module_name}/incron.d/repo-${repotype}.erb"),
     notify  => Class['repo::service']
   }
@@ -121,17 +123,23 @@ define repo::instance (
 
   # Yum stuff
   if $repotype == 'yum' {
-    $yum_dirs = [
-      prefix($real_version, "${repo::basedir}/${repotype}/incoming/${name}/"),
-      prefix($real_version, "${repodir}/") ]
-    file { $yum_dirs:
+    # If not upload, root should own incoming
+    file { "${repo::basedir}/${repotype}/incoming/${name}/${real_version}":
+      ensure => directory,
+      require => File[$dirs],
+      owner => $upload? { true => $repo::user, default => root },
+      group => $upload? { true => $repo::group, default => root },
+    }
+
+    file { "${repodir}/${real_version}":
       ensure => directory,
       require => File[$dirs]
     }
+
     # Create RHEL symlinks for use of yum variable $releasever
     $pub_dir = prefix($real_version, "${repodir}/")
     repo::instance::yum_rhel_symlink { $pub_dir:
-      require => File[$yum_dirs]
+      require => File["${repodir}/${real_version}"]
     }
   }
 
