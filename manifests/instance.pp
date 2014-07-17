@@ -124,22 +124,22 @@ define repo::instance (
   # Yum stuff
   if $repotype == 'yum' {
     # If not upload, root should own incoming
-    file { "${repo::basedir}/${repotype}/incoming/${name}/${real_version}":
+    $incoming_dir = prefix($real_version, "${repo::basedir}/${repotype}/incoming/${name}/")
+    file { $incoming_dir:
       ensure => directory,
       require => File[$dirs],
       owner => $upload? { true => $repo::user, default => root },
       group => $upload? { true => $repo::group, default => root },
     }
-
-    file { "${repodir}/${real_version}":
+    $pub_dir = prefix($real_version, "${repodir}/")
+    file { $pub_dir:
       ensure => directory,
       require => File[$dirs]
     }
 
     # Create RHEL symlinks for use of yum variable $releasever
-    $pub_dir = prefix($real_version, "${repodir}/")
     repo::instance::yum_rhel_symlink { $pub_dir:
-      require => File["${repodir}/${real_version}"]
+      require => File[$pub_dir]
     }
   }
 
