@@ -152,7 +152,7 @@ define repo::instance::yum_rhel_symlink() {
     target => $name
   }
 
-  file { "${name}Client":
+  file { "${name}Workstation":
     ensure => link,
     target => $name
   }
