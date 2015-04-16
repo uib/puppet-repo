@@ -29,8 +29,5 @@ repo="$base/pub/$name"
 # Update repo
 /bin/su -c "/usr/bin/createrepo --update --database --cachedir "${repo}/${releasever}"/cache "${repo}/${releasever}"" <%= scope.lookupvar("repo::user") %>
 
-# Generate HTML index
-/bin/su -c "/usr/bin/repoview -q "${repo}/$repo"" <%= scope.lookupvar("repo::user") %>
-
 rm "$incoming/$file"
 
