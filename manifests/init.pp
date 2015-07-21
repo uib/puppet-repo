@@ -63,7 +63,7 @@ class repo (
   class { 'repo::install': } ->
   class { 'repo::config': } ->
   class { 'repo::service': }
-  if $generate_gpgkey {
+  if $generate_gpgkey and $incoming {
     class { 'repo::keygen':
       require => Class['repo::config']
     }
