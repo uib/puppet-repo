@@ -6,21 +6,19 @@
 # == Actions
 #
 # Configures repos and sets up a user and mechanism for uploading packages.
-# Repos are reindexed on demand by listeing for write events using incron.
-#
-# The following set of directories are set up:
-#
-# $basedir/yum/pub/
-#             /incoming/
-#         /apt/pub/
-#             /incoming/
-#         /gem/pub/
-#             /incomming/
+# Repos are reindexed on uploads with write events using incron.
 #
 # Each instance of a repo will have one directory under each /incoming/ and
 # each /pub/
 #
+# Known bugs: Will not accept multiple file uploads. Only use scp with single file.
+#
+# Requires github.com/puppetlabs/puppetlabs-stdlib >= 4.6.0
+#
 # == Parameters
+#
+# [*repo_types*]
+#   Array with the repo types to set up. Allowed values are yum, apt and gem
 #
 # [*basedir*]
 #   Base path of all repositories. Repositories will be created in this path.
@@ -39,8 +37,10 @@
 #
 # == Examples
 #
-#  class { "repo": }
-#  
+#  class { "repo":
+#    repo_types => [ 'yum', 'apt' ]
+#  }
+#
 # == Authors
 #
 # Raymond Kristiansen <raymond.kristiansen@it.uib.no>
@@ -48,6 +48,7 @@
 # Christian Bryn <christian.bryn@freecode.no>
 #
 class repo (
+  $repo_types = [ 'yum', 'apt', 'gem'],
   $basedir = "/var/lib/repo",
   $scriptdir = "/usr/local/bin",
   $user = "repo",
@@ -56,6 +57,8 @@ class repo (
   $generate_gpgkey = false,
   $user_keys = {}
 ) {
+
+  validate_array($repo_types)
 
   class { 'repo::install': } ->
   class { 'repo::config': } ->

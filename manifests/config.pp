@@ -4,6 +4,9 @@
 #
 # == Parameters
 #
+# [*incoming*]
+#   If this is false, we do not set up incoming dirs and ssh keys
+#
 # == Authors
 #
 # Raymond Kristiansen <raymond.kristiansen@it.uib.no>
@@ -12,13 +15,28 @@ class repo::config(
   $basedir    = $::repo::basedir,
   $user       = $::repo::user,
   $group      = $::repo::group,
-  $user_keys  = $::repo::user_keys
+  $user_keys  = $::repo::user_keys,
+  $incoming   = $::repo::incoming,
+  $repo_types = $::repo::repo_types
 ) {
 
-  $dirs = [$basedir,
-          "${basedir}/yum", "${basedir}/yum/pub", "${basedir}/yum/incoming",
-          "${basedir}/apt", "${basedir}/apt/pub", "${basedir}/apt/incoming",
-          "${basedir}/gem", "${basedir}/gem/pub", "${basedir}/gem/incoming" ]
+  File {
+    owner  => $user,
+    group  => $group,
+    mode   => '0755'
+  }
+
+  $repodir = prefix($repo_types, "${basedir}/")
+  $pubdir = suffix($repodir, '/pub')
+  $incoming_dir = suffix($repodir, '/incoming')
+
+  file { [ $basedir, $repodir, $pubdir ]:
+    ensure => directory
+  }
+
+  file { $incoming_dir:
+    ensure => $incoming? { true => directory, default => absent }
+  }
 
   user { $user:
     ensure      => present,
@@ -36,17 +54,8 @@ class repo::config(
     gid => 505,
   }
 
-  file { $dirs:
-    ensure => directory,
-    owner  => $user,
-    group  => $group,
-    mode   => '0755';
-  }
-
   # Add ssh keys for upload users
-#  unless empty($ssh_keys) {
   create_resources('repo::add_ssh_keys', $user_keys)
-#  }
 
 }
 

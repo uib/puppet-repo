@@ -54,9 +54,10 @@ define repo::instance (
   $arch,
   $description="${name} repository",
   $sign = false,
-  $upload = true
+  $upload = true,
+  $incoming = $::repo::incoming
 ) {
-  
+
   # Validate repo type
   if ! ($repotype in ['apt','yum','gem']) {
     fail "Non-supported repository type"
@@ -76,20 +77,26 @@ define repo::instance (
 
   # Create repo dirs
   $repodir = "${repo::basedir}/${repotype}/pub/${name}"
-  $dirs = [ $repodir, "${repo::basedir}/${repotype}/incoming/${name}" ]
-
-  file { $dirs:
+  file { $repodir:
     ensure => directory,
   }
 
+  # Create incoming repo dir
+  file { "${repo::basedir}/${repotype}/incoming/${name}":
+    ensure => $incoming? { true => directory, default => absent },
+    force => true
+  }
+
   # Incron entry
-  file { "/etc/incron.d/${repotype}-${name}":
-    ensure  => present,
-    mode    => '0644',
-    owner   => root,
-    group   => root,
-    content => template("${module_name}/incron.d/repo-${repotype}.erb"),
-    notify  => Class['repo::service']
+  if $incoming {
+    file { "/etc/incron.d/${repotype}-${name}":
+      ensure  => $incoming? { true => present, default => absent },
+      mode    => '0644',
+      owner   => root,
+      group   => root,
+      content => template("${module_name}/incron.d/repo-${repotype}.erb"),
+      notify  => Class['repo::service']
+    }
   }
 
   # Apt stuff
@@ -126,15 +133,19 @@ define repo::instance (
     # If not upload, root should own incoming
     $incoming_dir = prefix($real_version, "${repo::basedir}/${repotype}/incoming/${name}/")
     file { $incoming_dir:
-      ensure => directory,
-      require => File[$dirs],
+      ensure => $incoming? {
+        true => directory,
+        default => absent },
+      force => true,
+      require => File["${repo::basedir}/${repotype}/incoming/${name}"],
       owner => $upload? { true => $repo::user, default => root },
       group => $upload? { true => $repo::group, default => root },
     }
+
     $pub_dir = prefix($real_version, "${repodir}/")
     file { $pub_dir:
       ensure => directory,
-      require => File[$dirs]
+      require => File[$repodir]
     }
 
     # Create RHEL symlinks for use of yum variable $releasever
