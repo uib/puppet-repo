@@ -14,7 +14,9 @@
 class repo::config(
   $basedir    = $::repo::basedir,
   $user       = $::repo::user,
+  $uid        = $::repo::uid,
   $group      = $::repo::group,
+  $gid        = $::repo::gid,
   $user_keys  = $::repo::user_keys,
   $incoming   = $::repo::incoming,
   $repo_types = $::repo::repo_types
@@ -35,43 +37,29 @@ class repo::config(
   }
 
   file { $incoming_dir:
-    ensure => $incoming? { true => directory, default => absent },
-    force => true
+    ensure => $incoming? {
+      true    => directory,
+      default => absent },
+    force  => true
   }
 
   user { $user:
-    ensure      => present,
-    home        => $basedir,
-    uid         => 505,
-    gid         => 505,
-    managehome  => true,
-    system      => true,
-    comment     => 'System user for package repositories',
-    require     => Group[$group]
+    ensure     => present,
+    home       => $basedir,
+    uid        => $uid,
+    gid        => $gid,
+    managehome => true,
+    system     => true,
+    comment    => 'System user for package repositories',
+    require    => Group[$group]
   }
 
   group { $group:
     ensure => present,
-    gid => 505,
+    gid    => $gid,
   }
 
   # Add ssh keys for upload users
   create_resources('repo::add_ssh_keys', $user_keys)
-
-}
-
-define repo::add_ssh_keys(
-  $key,
-  $ensure = present,
-  $type = 'ssh-rsa',
-  $user = $::repo::user
-) {
-
-  ssh_authorized_key { "${name}-${user}":
-    ensure => $ensure,
-    key => $key,
-    type => $type,
-    user => $user
-  }
 
 }

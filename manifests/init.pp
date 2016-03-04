@@ -49,10 +49,12 @@
 #
 class repo (
   $repo_types = [ 'yum', 'apt', 'gem'],
-  $basedir = "/var/lib/repo",
-  $scriptdir = "/usr/local/bin",
-  $user = "repo",
-  $group = "repo",
+  $basedir = '/var/lib/repo',
+  $scriptdir = '/usr/local/bin',
+  $user = 'repo',
+  $uid = 505,
+  $group = 'repo',
+  $gid = 505,
   $incoming = true,
   $generate_gpgkey = false,
   $user_keys = {}
