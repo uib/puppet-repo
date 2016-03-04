@@ -11,7 +11,8 @@
 # Each instance of a repo will have one directory under each /incoming/ and
 # each /pub/
 #
-# Known bugs: Will not accept multiple file uploads. Only use scp with single file.
+# Known bugs: Will not accept multiple file uploads.
+# Only use scp with single file.
 #
 # Requires github.com/puppetlabs/puppetlabs-stdlib >= 4.6.0
 #
@@ -60,6 +61,7 @@ class repo (
 
   validate_array($repo_types)
 
+
   class { 'repo::install': } ->
   class { 'repo::config': } ->
   class { 'repo::service': }
@@ -67,6 +69,10 @@ class repo (
     class { 'repo::keygen':
       require => Class['repo::config']
     }
+  }
+
+  Repo::Instance {
+    require => Class['repo::install']
   }
 
 }
